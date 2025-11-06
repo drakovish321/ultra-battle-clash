@@ -8,15 +8,24 @@
 </head>
 <body>
     <h1>Ultra Battle Clash</h1>
+
+    <!-- Login/Register Form -->
     <div id="login">
         <input type="text" id="username" placeholder="Username">
         <input type="password" id="password" placeholder="Password">
         <button id="loginBtn">Login / Register</button>
     </div>
+
+    <!-- Game Container -->
     <div id="game" style="display:none;">
         <canvas id="gameCanvas"></canvas>
-        <div id="leaderboard"></div>
+        <div id="leaderboard">
+            <h3>Leaderboard</h3>
+            <div id="lbList"></div>
+        </div>
     </div>
+
+    <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.js"></script>
     <script src="main.js"></script>
 </body>

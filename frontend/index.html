@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ultra Battle Clash</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1>Ultra Battle Clash</h1>
+    <div id="login">
+        <input type="text" id="username" placeholder="Username">
+        <input type="password" id="password" placeholder="Password">
+        <button id="loginBtn">Login / Register</button>
+    </div>
+    <div id="game" style="display:none;">
+        <canvas id="gameCanvas"></canvas>
+        <div id="leaderboard"></div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.js"></script>
+    <script src="main.js"></script>
+</body>
+</html>

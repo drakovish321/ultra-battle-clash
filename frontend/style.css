@@ -1,0 +1,18 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #111;
+    color: #fff;
+    text-align: center;
+}
+#login input {
+    margin: 5px;
+    padding: 8px;
+}
+#gameCanvas {
+    margin: 20px auto;
+    border: 2px solid #fff;
+    display: block;
+}
+#leaderboard {
+    margin-top: 10px;
+}

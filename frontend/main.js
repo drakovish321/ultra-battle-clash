@@ -1,3 +1,8 @@
+// -------------------------------
+// CONFIG
+// -------------------------------
+const BACKEND_URL = 'https://your-backend-url.onrender.com'; // Replace with your Render backend URL
+
 // Phaser game config
 const config = {
     type: Phaser.AUTO,
@@ -11,47 +16,93 @@ const config = {
     }
 };
 
+// -------------------------------
+// GLOBALS
+// -------------------------------
 let game;
-let playerData = JSON.parse(localStorage.getItem('playerData')) || { coins:0, level:1, wins:0 };
 let socket;
+let playerData = JSON.parse(localStorage.getItem('playerData')) || { coins:0, level:1, wins:0 };
 
+// -------------------------------
+// LOGIN / REGISTER
+// -------------------------------
 document.getElementById('loginBtn').addEventListener('click', async () => {
-    const username = document.getElementById('username').value;
-    const password = document.getElementById('password').value;
+    const username = document.getElementById('username').value.trim();
+    const password = document.getElementById('password').value.trim();
 
-    const res = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({username,password})
-    });
-    const data = await res.json();
-    if(data.success){
-        document.getElementById('login').style.display='none';
-        document.getElementById('game').style.display='block';
-        startGame();
-    } else {
-        alert(data.message);
+    if(!username || !password){
+        alert('Please enter username and password.');
+        return;
+    }
+
+    try {
+        const res = await fetch(`${BACKEND_URL}/api/auth/login`, {
+            method: 'POST',
+            headers:{'Content-Type':'application/json'},
+            body: JSON.stringify({username,password})
+        });
+        const data = await res.json();
+        if(data.success){
+            document.getElementById('login').style.display = 'none';
+            document.getElementById('game').style.display = 'block';
+            startGame();
+        } else {
+            alert(data.message);
+        }
+    } catch(err){
+        alert('Error connecting to backend.');
+        console.error(err);
     }
 });
 
+// -------------------------------
+// START GAME
+// -------------------------------
 function startGame(){
+    // Start Phaser game
     game = new Phaser.Game(config);
 
-    // connect socket
-    socket = io();
+    // Connect Socket.io
+    socket = io(BACKEND_URL);
 
-    // send battle move example
-    socket.on('battleResult', (result)=>{
+    socket.on('connect', () => {
+        console.log('Connected to backend with Socket.io');
+    });
+
+    socket.on('battleResult', result => {
         console.log('Battle result:', result);
-        playerData.wins += result.win ? 1:0;
+        if(result.win) playerData.wins += 1;
         updateLeaderboard();
+        saveProgress();
     });
 
-    window.addEventListener('beforeunload', ()=>{
-        localStorage.setItem('playerData', JSON.stringify(playerData));
-    });
+    // Update leaderboard periodically
+    updateLeaderboard();
+
+    // Save progress on page close
+    window.addEventListener('beforeunload', saveProgress);
 }
 
+// -------------------------------
+// LEADERBOARD
+// -------------------------------
+async function updateLeaderboard(){
+    try {
+        const res = await fetch(`${BACKEND_URL}/api/leaderboard`);
+        const data = await res.json();
+        const lbList = document.getElementById('lbList');
+        lbList.innerHTML = '';
+        data.forEach(user => {
+            lbList.innerHTML += `${user.username}: ${user.wins} wins<br>`;
+        });
+    } catch(err){
+        console.error('Error fetching leaderboard', err);
+    }
+}
+
+// -------------------------------
+// PHASER SCENE
+// -------------------------------
 function preload(){
     this.load.image('player','assets/player.png');
 }
@@ -62,14 +113,9 @@ function create(){
 
 function update(){}
 
-function updateLeaderboard(){
-    fetch('/api/leaderboard')
-        .then(res=>res.json())
-        .then(data=>{
-            const lb = document.getElementById('leaderboard');
-            lb.innerHTML = '<h3>Leaderboard</h3>';
-            data.forEach(u=>{
-                lb.innerHTML += `${u.username}: ${u.wins} wins<br>`;
-            });
-        });
+// -------------------------------
+// OFFLINE PROGRESS
+// -------------------------------
+function saveProgress(){
+    localStorage.setItem('playerData', JSON.stringify(playerData));
 }
